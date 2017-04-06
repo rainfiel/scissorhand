@@ -144,8 +144,73 @@ void elf_hooker::hook_all_modules(const char* func_name, void* pfn_new, void** p
         {
             continue;
         }
-        log_info("Hook Module : %s\n", itor->second.get_module_name());
+        // log_info("Hook Module : %s\n", itor->second.get_module_name());
         this->hook(&itor->second, func_name, pfn_new, ppfn_old);
+    }
+    return;
+}
+
+void elf_hooker::dump_symbols()
+{
+    for (std::map<std::string, elf_module>::iterator itor = m_modules.begin();
+                    itor != m_modules.end();
+                    itor++ )
+    {
+        if (this->m_prehook_cb && !this->m_prehook_cb(itor->second.get_module_name(), NULL))
+        {
+            continue;
+        }
+        log_info("dump_symbols Module : %s\n", itor->second.get_module_name());
+        ((elf_module*)&itor->second)->dump_symbols();
+    }
+    return;
+}
+
+void elf_hooker::dump_dynamics()
+{
+    for (std::map<std::string, elf_module>::iterator itor = m_modules.begin();
+                    itor != m_modules.end();
+                    itor++ )
+    {
+        if (this->m_prehook_cb && !this->m_prehook_cb(itor->second.get_module_name(), NULL))
+        {
+            continue;
+        }
+        log_info("dump_dynamics Module : %s\n", itor->second.get_module_name());
+        ((elf_module*)&itor->second)->dump_dynamics();
+    }
+    return;
+}
+
+void elf_hooker::dump_segments()
+{
+    for (std::map<std::string, elf_module>::iterator itor = m_modules.begin();
+                    itor != m_modules.end();
+                    itor++ )
+    {
+        if (this->m_prehook_cb && !this->m_prehook_cb(itor->second.get_module_name(), NULL))
+        {
+            continue;
+        }
+        log_info("dump_segments Module : %s\n", itor->second.get_module_name());
+        ((elf_module*)&itor->second)->dump_segments();
+    }
+    return;
+}
+
+void elf_hooker::dump_sections()
+{
+    for (std::map<std::string, elf_module>::iterator itor = m_modules.begin();
+                    itor != m_modules.end();
+                    itor++ )
+    {
+        if (this->m_prehook_cb && !this->m_prehook_cb(itor->second.get_module_name(), NULL))
+        {
+            continue;
+        }
+        log_info("dump_segments Module : %s\n", itor->second.get_module_name());
+        ((elf_module*)&itor->second)->dump_sections();
+        ((elf_module*)&itor->second)->dump_sections2();
     }
     return;
 }

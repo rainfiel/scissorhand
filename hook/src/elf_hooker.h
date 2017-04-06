@@ -16,6 +16,10 @@ public:
 
     bool phrase_proc_maps();
     void dump_module_list();
+    void dump_symbols();
+    void dump_dynamics();
+    void dump_segments();
+    void dump_sections();
 
 //    void* caculate_base_addr_from_soinfo_pointer(void* soinfo_addr);
     /* *

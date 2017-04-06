@@ -127,7 +127,7 @@ bool elf_module::get_segment_view(void)
 
     if (this->m_ehdr->e_type == ET_EXEC || this->m_ehdr->e_type == ET_DYN)
     {
-        log_error("[+] Executable File or Shared Object, ElfHook Process..\n");
+        // log_error("[+] Executable File or Shared Object, ElfHook Process..\n");
     }
     else
     {
@@ -189,7 +189,7 @@ bool elf_module::get_segment_view(void)
                 this->m_bucket  = rawdata + 2;
                 this->m_chain   = this->m_bucket + this->m_nbucket;
                 this->m_sym_size   = this->m_nchain;
-                log_info("nbucket: %d, nchain: %d, bucket: %p, chain:%p\n", this->m_nbucket, this->m_nchain, this->m_bucket, this->m_chain);
+                // log_info("nbucket: %d, nchain: %d, bucket: %p, chain:%p\n", this->m_nbucket, this->m_nchain, this->m_bucket, this->m_chain);
                 break;
             }
         case DT_GNU_HASH:
@@ -463,17 +463,17 @@ bool elf_module::hook(const char *symbol, void *replace_func, void **old_func)
     this->find_symbol_by_name(symbol, &sym, &symidx);
     if(!sym)
     {
-        // log_error("[-] Could not find symbol %s\n", symbol);
+        // log_error("[-] %s Could not find symbol %s\n", symbol);
         return false;
     }
     else
     {
-        log_info("[+] sym %p, symidx %d.\n", sym, symidx);
+        log_info("[+] %s:%s sym %p, symidx %d.\n", this->m_module_name.c_str(), symbol, sym, symidx);
     }
 
     int relplt_counts = this->get_is_use_rela() ? this->m_relplt_bytes / sizeof(ElfW(Rela)) : this->m_relplt_bytes / sizeof(ElfW(Rel));
     
-    log_info("......relplt_counts:%d %d\n", relplt_counts, this->get_is_use_rela());
+    log_info("......relplt_counts:%d base %x bias %x\n", relplt_counts, this->m_base_addr, this->m_bias_addr);
     for (uint32_t i = 0; i < relplt_counts; i++)
     {
         unsigned long r_info = 0;   // for Elf32 it's Elf32_Word, but Elf64 it's Elf64_Xword.
@@ -497,13 +497,13 @@ bool elf_module::hook(const char *symbol, void *replace_func, void **old_func)
                 log_info("replace_function fail\n");
                 return false;
             }
-            break;
+            return true;
         }
 
         if (elf_r_sym(r_info) == symidx) {
             log_error("...x：%d\n", elf_r_type(r_info));
         }
-        log_error(">>>%d %d offset %d\n", elf_r_sym(r_info), elf_r_type(r_info), r_offset);
+        // log_error(">>>%d %d offset %d\n", elf_r_sym(r_info), elf_r_type(r_info), r_offset);
     }
 
     int reldyn_counts = this->get_is_use_rela() ? this->m_reldyn_bytes / sizeof(ElfW(Rela)) : this->m_reldyn_bytes / sizeof(ElfW(Rel));
@@ -513,6 +513,7 @@ bool elf_module::hook(const char *symbol, void *replace_func, void **old_func)
     {
         unsigned long r_info = 0;   // for Elf32 it's Elf32_Word, but Elf64 it's Elf64_Xword.
         ElfW(Addr) r_offset = 0;
+
         if (this->get_is_use_rela())
         {
             ElfW(Rela) *rela = reinterpret_cast<ElfW(Rela) *>(this->m_reldyn_addr + sizeof(ElfW(Rela)) * i);
@@ -534,13 +535,25 @@ bool elf_module::hook(const char *symbol, void *replace_func, void **old_func)
                     log_info("replace_function fail\n");
                     return false;
                 }
-                break;
+                return true;
             } else {
                 log_error("elf_r_type missmatch:%d\n", elf_r_type(r_info));
             }
         }
-        log_error(">>>>>%d %d offset %d\n", elf_r_sym(r_info), elf_r_type(r_info), r_offset);
+
+        // log_error(">>>>>%d %d offset %d\n", elf_r_sym(r_info), elf_r_type(r_info), r_offset);
     }
+
+
+    // int sz = snprintf( NULL, 0, "%x", sym->st_value-1 );
+    // char* c = (char*)malloc( sz + 1 );
+    // snprintf( c, sz + 1, "%x", sym->st_value-1 );
+
+    // void *addr = (void *) strtoul(c, NULL, 16);
+    void *addr = (void *) (this->get_bias_addr() + sym->st_value-0x00AC47D4);
+    log_info("%s relative symbol:0x%x %p\n",this->m_symstr_ptr + sym->st_name, sym->st_value-1, addr);
+
+    this->replace_function(addr, replace_func, old_func);
     return true;
 }
 
@@ -676,7 +689,7 @@ void elf_module::dump_sections2() {
     ElfW(Half) shnum = this->m_ehdr->e_shnum;
     ElfW(Shdr) *shdr = this->m_shdr;
 
-    log_info("Sections: :%d\n",shnum);
+    log_info("Sections2: :%d\n",shnum);
     for(int i = 0; i < shnum; i += 1, shdr += 1) {
         log_info("Name(%x);Type(%x);Addr(%lx);offset(%lx);entSize(%lx)\n",
                 shdr->sh_name,
@@ -685,7 +698,7 @@ void elf_module::dump_sections2() {
                 (unsigned long)shdr->sh_offset,
                 (unsigned long)shdr->sh_entsize);
     }
-    log_info("Sections: end\n");
+    log_info("Sections2: end\n");
 }
 
 void elf_module::dump_segments(void)
