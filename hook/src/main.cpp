@@ -6,7 +6,7 @@
 
 #include <dlfcn.h>
 #include <openssl/evp.h>
-#include <sqlite3.h>
+// #include <sqlite3.h>
 
 #include "elf_hooker.h"
 

@@ -35,7 +35,7 @@ try:
     print "@ Pushing files to /data/local/tmp ..."
 
     adb.sh( "rm -rf /data/local/tmp/injector /data/local/tmp/libElfHook.so" )
-    adb.push( "libs/armeabi/injector",  "/data/local/tmp/injector" )
+    adb.push( "libs/armeabi-v7a/injector",  "/data/local/tmp/injector" )
     adb.push( "libs/armeabi-v7a/libElfHook.so", "/data/local/tmp/libElfHook.so" )
     adb.sh( "chmod 777 /data/local/tmp/injector" )
 
@@ -50,7 +50,7 @@ try:
     print "@ Injection into PID %d starting ..." % pid
 
     print(adb.sudo( "/data/local/tmp/injector %d /data/local/tmp/libElfHook.so" % pid ))
-    # adb.logcat("LIBHOOK")
+    adb.logcat("LIBHOOK")
 
 except KeyboardInterrupt:
     print "\n\n@ CTRL+C detected, killing process ..."

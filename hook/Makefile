@@ -11,7 +11,7 @@ JNIFLAGS     += APP_PLATFORM=android-23
 JNIFLAGS     += APP_STL=stlport_static
 JNIFLAGS     += APP_PIE=true
 
-JNILIBPATH   = ../inject/libs/armeabi-v7a
+JNILIBPATH   = ../inject/libs
 
 
 all:

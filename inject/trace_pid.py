@@ -38,9 +38,9 @@ try:
 
     print "@ Pushing files to /data/local/tmp ..."
 
-    adb.sh( "rm -rf /data/local/tmp/injector /data/local/tmp/libhook.so" )
+    adb.sh( "rm -rf /data/local/tmp/injector /data/local/tmp/libElfHook.so" )
     adb.push( "libs/armeabi-v7a/injector",  "/data/local/tmp/injector" )
-    adb.push( "libs/armeabi-v7a/libhook.so", "/data/local/tmp/libhook.so" )
+    adb.push( "libs/armeabi-v7a/libElfHook.so", "/data/local/tmp/libElfHook.so" )
     adb.sh( "chmod 777 /data/local/tmp/injector" )
 
     # we need to set selinux to permissive in order to make ptrace work
@@ -49,7 +49,7 @@ try:
 
     print "@ Injection into PID %d starting ..." % pid
 
-    adb.sudo( "/data/local/tmp/injector %d /data/local/tmp/libhook.so" % pid )
+    adb.sudo( "/data/local/tmp/injector %d /data/local/tmp/libElfHook.so" % pid )
     adb.logcat("LIBHOOK")
 
 except KeyboardInterrupt:
