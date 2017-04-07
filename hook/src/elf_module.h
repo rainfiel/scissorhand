@@ -5,6 +5,7 @@
 #include <string>
 #include "elf_common.h"
 
+typedef void * (*_EVP_sha1)(void);
 
 class elf_module {
 

@@ -9,6 +9,7 @@
 // #include <sqlite3.h>
 
 #include "elf_hooker.h"
+#include "inlinehook.h"
 
 static void* (*__old_impl_dlopen)(const char* filename, int flag);
 
@@ -42,6 +43,13 @@ static size_t (*__old_impl_strlen)(const char *str);
 static void * (*__old_imp_memcpy)(void *str1, const void *str2, size_t n);
 
 static void * (*__old_impl__ZN5YiDou15YDSqliteManager6createESsSs)(std::string a, std::string b);
+
+static int (*__old_impl__ZN5YiDou15YDSqliteManagerinit)(std::string a, std::string b);
+
+static void (*__old_impl__ZN7cocos2d5CCLogEPKcz)(const char* fmt, ...);
+
+static int (*__old_imp_EVP_DecryptInit)(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+         unsigned char *key, unsigned char *iv);
 
 extern "C" {
 
@@ -145,6 +153,31 @@ extern "C" {
         log_info("__nativehook_impl__ZN5YiDou15YDSqliteManager6createESsSs -> (%s, %s)\n", a.c_str(), b.c_str());    
         return __old_impl__ZN5YiDou15YDSqliteManager6createESsSs(a, b);
     }
+
+
+    static int __nativehook_impl__ZN5YiDou15YDSqliteManagerinit(std::string a, std::string b)
+    {
+        log_info("__nativehook_impl__ZN5YiDou15YDSqliteManagerinit -> (%s, %s)\n", a.c_str(), b.c_str());    
+        return __old_impl__ZN5YiDou15YDSqliteManagerinit(a, b);
+    }
+
+
+    static void __nativehook_impl__ZN7cocos2d5CCLogEPKcz(const char* fmt, ...)
+    {
+        va_list ap;
+        va_start(ap, fmt);
+        log_info(fmt, ap);
+        va_end(ap);
+    }
+
+
+    static int __nativehook_imp_EVP_DecryptInit(EVP_CIPHER_CTX *ctx, const EVP_CIPHER *type,
+         unsigned char *key, unsigned char *iv)
+    {
+        log_info("__nativehook_imp_EVP_DecryptInit -> (%s, %s)\n", key, iv);    
+        return __old_imp_EVP_DecryptInit(ctx, type, key, iv);
+    }
+
 }
 
 static bool __prehook(const char* module_name, const char* func_name)
@@ -346,21 +379,26 @@ void __attribute__ ((constructor)) libElfHook_main()
     hooker.set_prehook_cb(__prehook);
     hooker.phrase_proc_maps();
     // hooker.dump_module_list();
-    // hooker.hook_all_modules("EVP_CipherInit", (void*)__nativehook_impl_evp_cipherinit, (void**)&__old_impl_evp_cipherinit);
-    // hooker.hook_all_modules("EVP_CipherInit_ex", (void*)__nativehook_impl_evp_cipherinit_ex, (void**)&__old_impl_evp_cipherinit_ex);
+    hooker.hook_all_modules("EVP_CipherInit", (void*)__nativehook_impl_evp_cipherinit, (void**)&__old_impl_evp_cipherinit);
+    hooker.hook_all_modules("EVP_CipherInit_ex", (void*)__nativehook_impl_evp_cipherinit_ex, (void**)&__old_impl_evp_cipherinit_ex);
  
     // hooker.hook_all_modules("strlen", (void*)__nativehook_impl_strlen, (void**)&__old_impl_strlen);
     // hooker.hook_all_modules("EVP_get_cipherbyname", (void*)__nativehook_impl_evp_get_cipherbyname, (void**)&__old_impl_EVP_get_cipherbyname);
-    // hooker.hook_all_modules("EVP_CipherUpdate", (void*)__nativehook_impl_evp_cipherupdate, (void**)&__old_impl_EVP_CipherUpdate);
-    // hooker.hook_all_modules("PKCS5_PBKDF2_HMAC_SHA1", (void*)__nativehook_impl_PKCS5_PBKDF2_HMAC_SHA1, (void**)&__old_impl_PKCS5_PBKDF2_HMAC_SHA1);
+    hooker.hook_all_modules("EVP_CipherUpdate", (void*)__nativehook_impl_evp_cipherupdate, (void**)&__old_impl_EVP_CipherUpdate);
+    hooker.hook_all_modules("EVP_DecryptInit", (void*)__nativehook_imp_EVP_DecryptInit, (void**)&__old_imp_EVP_DecryptInit);
+    hooker.hook_all_modules("PKCS5_PBKDF2_HMAC_SHA1", (void*)__nativehook_impl_PKCS5_PBKDF2_HMAC_SHA1, (void**)&__old_impl_PKCS5_PBKDF2_HMAC_SHA1);
     // hooker.set_prehook_cb(__prehook);
     // hooker.hook_all_modules("memcpy", (void*)__nativehook_impl_memcpy, (void**)&__old_imp_memcpy);
     // hooker.hook_all_modules("fopen", (void*)__nativehook_impl_fopen, (void**)&__old_impl_fopen);
-    // hooker.hook_all_modules("sqlite3_open", (void*)__nativehook_impl_sqlite_open, (void**)&__old_impl_sqlite_open);
-    hooker.hook_all_modules("_ZN5YiDou15YDSqliteManager6createESsSs", (void*)__nativehook_impl__ZN5YiDou15YDSqliteManager6createESsSs, (void**)&__old_impl__ZN5YiDou15YDSqliteManager6createESsSs);
+    hooker.hook_all_modules("sqlite3_open", (void*)__nativehook_impl_sqlite_open, (void**)&__old_impl_sqlite_open);
+    // hooker.hook_all_modules("_ZN5YiDou15YDSqliteManager6createESsSs", (void*)__nativehook_impl__ZN5YiDou15YDSqliteManager6createESsSs, (void**)&__old_impl__ZN5YiDou15YDSqliteManager6createESsSs);
+    // hooker.hook_all_modules("_ZN5YiDou15YDSqliteManager4initESsSs", (void*)__nativehook_impl__ZN5YiDou15YDSqliteManagerinit, (void**)&__old_impl__ZN5YiDou15YDSqliteManagerinit);
+    // hooker.hook_all_modules("EVP_sha1", (void*)__nativehook_impl__ZN5YiDou15YDSqliteManager6createESsSs, (void**)&__old_impl__ZN5YiDou15YDSqliteManager6createESsSs);
+    hooker.hook_all_modules("_ZN7cocos2d5CCLogEPKcz", (void*)__nativehook_impl__ZN7cocos2d5CCLogEPKcz, (void**)&__old_impl__ZN7cocos2d5CCLogEPKcz);
     // hooker.dump_symbols();
     // hooker.dump_dynamics();
     // hooker.dump_segments();
     // hooker.dump_sections();
+    // hooker.dump_proc_maps();
 }
 #endif

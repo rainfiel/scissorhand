@@ -13,6 +13,10 @@
 #include "elf_common.h"
 #include "elf_module.h"
 
+extern "C" {
+#include "inlinehook.h"
+}
+
 #define DT_GNU_HASH      ((int)0x6ffffef5)
 #define DT_ANDROID_REL   ((int)0x6000000f)
 #define DT_ANDROID_RELSZ ((int)0x60000010)
@@ -550,10 +554,15 @@ bool elf_module::hook(const char *symbol, void *replace_func, void **old_func)
     // snprintf( c, sz + 1, "%x", sym->st_value-1 );
 
     // void *addr = (void *) strtoul(c, NULL, 16);
-    void *addr = (void *) (this->get_bias_addr() + sym->st_value-0x00AC47D4);
+    void *addr = (void *) (this->get_bias_addr() + sym->st_value);
     log_info("%s relative symbol:0x%x %p\n",this->m_symstr_ptr + sym->st_name, sym->st_value-1, addr);
 
-    this->replace_function(addr, replace_func, old_func);
+    log_info("register:%d\n", registerInlineHook((uint32_t)addr, (uint32_t)replace_func, (uint32_t**)old_func));
+    log_info("inlinehook:%d\n", inlineHook((uint32_t)addr));
+
+    // log_info("sha1:%p\n", (*((_EVP_sha1)addr))());
+
+    // this->replace_function(addr, replace_func, old_func);
     return true;
 }
 

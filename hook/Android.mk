@@ -6,9 +6,11 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := libElfHook_static
 
 LOCAL_SRC_FILES := \
+                src/relocate.c \
+                src/inlinehook.c \
                 src/elf_common.cpp \
                 src/elf_hooker.cpp \
-                src/elf_module.cpp
+                src/elf_module.cpp 
 
 LOCAL_C_INCLUDES :=
 
