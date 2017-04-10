@@ -19,27 +19,6 @@ static void (*__old_impl__ZN7cocos2d5CCLogEPKcz)(const char* fmt, ...);
 
 extern "C" {
 
-    static void* __nativehook_impl_dlopen(const char* filename, int flag)
-    {
-        log_info("__nativehook_impl_dlopen -> (%s)\n", filename);
-        void* res = __old_impl_dlopen(filename, flag);
-        return res;
-    }
-
-    static int __nativehook_impl_connect(int sockfd,struct sockaddr * serv_addr,int addrlen)
-    {
-        log_info("__nativehook_impl_connect ->\n");
-        int res = __old_impl_connect(sockfd, serv_addr, addrlen);
-        return res;
-    }
-
-    static void* __nativehook_impl_android_dlopen_ext(const char* filename, int flags, const void* extinfo)
-    {
-        log_info("__nativehook_impl_android_dlopen_ext -> (%s)\n", filename);
-        void* res = __old_impl_android_dlopen_ext(filename, flags, extinfo);
-        return res;
-    }
-
     static int __nativehook_impl_fopen(const char *pathname, int flags)
     {
         log_info("__nativehook_impl_fopen -> (%s)\n", pathname);
@@ -84,8 +63,8 @@ int main(int argc, char* argv[])
     hooker.set_prehook_cb(__prehook);
     hooker.phrase_proc_maps();
     hooker.dump_module_list();
-    hooker.hook_all_modules("dlopen", (void*)__nativehook_impl_dlopen, (void**)&__old_impl_dlopen);
-    hooker.hook_all_modules("connect", (void*)__nativehook_impl_connect, (void**)&__old_impl_connect);
+    // hooker.hook_all_modules("dlopen", (void*)__nativehook_impl_dlopen, (void**)&__old_impl_dlopen);
+    // hooker.hook_all_modules("connect", (void*)__nativehook_impl_connect, (void**)&__old_impl_connect);
 
     do {
         ch = getc(stdin);
@@ -126,7 +105,7 @@ static int __set_hook(JNIEnv *env, jobject thiz)
     // __hooker.hook_all_modules("connect", (void*)__nativehook_impl_connect, (void**)&__old_impl_connect);
     // __hooker.hook_all_modules("android_dlopen_ext", (void*)__nativehook_impl_android_dlopen_ext, (void**)&__old_impl_android_dlopen_ext);
 
-    __hooker.hook_all_modules("EVP_CipherInit", (void*)__nativehook_impl_evp_cipherinit, (void**)&__old_impl_evp_cipherinit);
+    // __hooker.hook_all_modules("EVP_CipherInit", (void*)__nativehook_impl_evp_cipherinit, (void**)&__old_impl_evp_cipherinit);
 
 #if 0
     void* h = dlopen("libart.so", RTLD_LAZY);
@@ -260,8 +239,8 @@ void __attribute__ ((constructor)) libElfHook_main()
     hooker.set_prehook_cb(__prehook);
     hooker.phrase_proc_maps();
 
-    hooker.hook_all_modules("fopen", (void*)__nativehook_impl_fopen, (void**)&__old_impl_fopen);
+    // hooker.hook_all_modules("fopen", (void*)__nativehook_impl_fopen, (void**)&__old_impl_fopen);
     hooker.hook_all_modules("sqlite3_open", (void*)__nativehook_impl_sqlite_open, (void**)&__old_impl_sqlite_open);
-    hooker.hook_all_modules("_ZN7cocos2d5CCLogEPKcz", (void*)__nativehook_impl__ZN7cocos2d5CCLogEPKcz, (void**)&__old_impl__ZN7cocos2d5CCLogEPKcz);
+    // hooker.hook_all_modules("_ZN7cocos2d5CCLogEPKcz", (void*)__nativehook_impl__ZN7cocos2d5CCLogEPKcz, (void**)&__old_impl__ZN7cocos2d5CCLogEPKcz);
 }
 #endif
